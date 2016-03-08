@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 
-inline std::string to_dvorak(std::string& qwerty, std::map<char, char>& map) {    
+inline std::string to_dvorak(std::string& qwerty, std::map<char, char>& map) {
     std::string ret;
     for (auto c : qwerty) {
       ret += map[c];
@@ -42,7 +42,8 @@ int main() {
   std::ifstream dict("/usr/share/dict/words");
   std::string line;
   std::string converted;
-  std::vector<std::string> lines;
+  std::vector<std::string> valid_dict;
+  std::vector<std::string> full_dict;
 
   while(std::getline(dict, line)) {
     std::size_t e = line.find("e");
@@ -57,16 +58,17 @@ int main() {
 
     if ( e == std::string::npos && q == std::string::npos && w == std::string::npos && z == std::string::npos
         && E == std::string::npos && Q == std::string::npos && W == std::string::npos && Z == std::string::npos) {
-          lines.push_back(line);
+          valid_dict.push_back(line);
     }
+    full_dict.push_back(line);
   }
 
   std::map<std::string, bool> index;
-  for (auto line : lines) {
+  for (auto line : full_dict) {
     index[line] = true;
   }
 
-  for (auto line : lines) {
+  for (auto line : valid_dict) {
     converted = to_dvorak(line, q_to_d);
     if (index[converted] == true) {
       std::cout << line << "  |  " << converted << std::endl;
