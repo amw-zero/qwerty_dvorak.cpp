@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <map>
+#include <thread>
+#include <vector>
 
 typedef std::vector<std::string>::iterator words_iter;
 
@@ -15,7 +16,6 @@ inline std::string to_dvorak(std::string& qwerty, std::map<char, char>& map) {
 }
 
 int main() {
-    
     std::map<char, char> q_to_d = {
         {'a', 'a'},
         {'b', 'x'},
@@ -43,7 +43,6 @@ int main() {
     
     std::ifstream dict("/usr/share/dict/words");
     std::string line;
-    std::string converted;
     std::vector<std::string> valid_dict;
     std::vector<std::string> full_dict;
     
@@ -78,22 +77,30 @@ int main() {
     const unsigned long size = full_dict.size();
     const unsigned long chunk = size / NUM_THREADS;
     std::cout << "Chunk size: " << chunk << std::endl;
-
-
+    
+    std::vector<std::thread> workers;
+    
     for (int i = 0; i < NUM_THREADS; i++) {
         words_iter start = full_dict.begin() + i * chunk;
         words_iter end = full_dict.begin() + ((i + 1) * chunk) - 1;
-
+        
         if (i == NUM_THREADS - 1) {
             end = full_dict.end();
         }
         
         // Conquer
-        for (words_iter i = start; i != end; i++) {
-            converted = to_dvorak(*i, q_to_d);
-            if (index[converted] == true) {
-                std::cout << *i << "  |  " << converted << std::endl;
+        
+        workers.push_back(std::thread([&q_to_d, &index, start, end, i]() {
+            for (words_iter i = start; i != end; i++) {
+                std::string converted = to_dvorak(*i, q_to_d);
+                if (index[converted] == true) {
+                    std::cout << *i << "  |  " << converted << std::endl;
+                }
             }
-        }
-    }  
+        }));
+    }
+    
+    for (int i = 0; i < NUM_THREADS; i++) {
+        workers[i].join();
+    }
 }
