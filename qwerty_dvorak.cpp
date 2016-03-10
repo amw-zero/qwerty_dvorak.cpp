@@ -72,7 +72,6 @@ int main() {
     }
     
     // Divide
-    // |--- | ---- |--- | --- |
     const int NUM_THREADS = 4;
     const unsigned long size = full_dict.size();
     const unsigned long chunk = size / NUM_THREADS;
